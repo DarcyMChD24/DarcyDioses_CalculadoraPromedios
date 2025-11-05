@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Promedio Académico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .specialty-bar {
+            height: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .notas-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .btn-calcular {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .btn-calcular:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-calcular:active {
+            transform: translateY(0);
+        }
+
+        .resultado {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .resultado.aprobado {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .resultado.desaprobado {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            color: white;
+        }
+
+        .resultado h2 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .resultado p {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .promedio-display {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .estado {
+            font-size: 20px;
+            font-weight: 600;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .footer {
+            background: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* Colores de especialidades */
+        .desarrollo-sistemas { background-color: #3498db; }
+        .contabilidad { background-color: #27ae60; }
+        .enfermeria { background-color: #e91e63; }
+        .petroleo { background-color: #ff9800; }
+        .pesquero { background-color: #00bcd4; }
+        .mecatronica { background-color: #757575; }
+
+        @media (max-width: 600px) {
+            .notas-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-container {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Calculadora de Promedio Académico</h1>
+            <p>Sistema de cálculo de notas para estudiantes</p>
+        </div>
+        
+        <div class="specialty-bar" id="specialtyBar"></div>
+
+        <div class="form-container">
+            <form id="promedioForm">
+                <div class="form-group">
+                    <label for="nombreCompleto">Nombre y Apellido del Estudiante</label>
+                    <input type="text" id="nombreCompleto" placeholder="Ejemplo: Juan Pérez García" required>
+                    <span class="error" id="errorNombre">Por favor, ingrese el nombre completo</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="especialidad">Especialidad</label>
+                    <select id="especialidad" required>
+                        <option value="">-- Seleccione una especialidad --</option>
+                        <option value="desarrollo-sistemas">Desarrollo de Sistemas</option>
+                        <option value="contabilidad">Contabilidad</option>
+                        <option value="enfermeria">Enfermería Técnica</option>
+                        <option value="petroleo">Petróleo, Gas y Refinación</option>
+                        <option value="pesquero">Desarrollo Pesquero y Acuícola</option>
+                        <option value="mecatronica">Mecatrónica Automotriz</option>
+                    </select>
+                    <span class="error" id="errorEspecialidad">Por favor, seleccione una especialidad</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Notas (0-20)</label>
+                    <div class="notas-grid">
+                        <div>
+                            <input type="number" id="nota1" placeholder="Nota 1" min="0" max="20" step="0.5" required>
+                            <span class="error" id="errorNota1">Nota inválida (0-20)</span>
+                        </div>
+                        <div>
+                            <input type="number" id="nota2" placeholder="Nota 2" min="0" max="20" step="0.5" required>
+                            <span class="error" id="errorNota2">Nota inválida (0-20)</span>
+                        </div>
+                        <div>
+                            <input type="number" id="nota3" placeholder="Nota 3" min="0" max="20" step="0.5" required>
+                            <span class="error" id="errorNota3">Nota inválida (0-20)</span>
+                        </div>
+                        <div>
+                            <input type="number" id="nota4" placeholder="Nota 4" min="0" max="20" step="0.5" required>
+                            <span class="error" id="errorNota4">Nota inválida (0-20)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-calcular">🧮 Calcular Promedio</button>
+            </form>
+
+            <div class="resultado" id="resultado">
+                <h2>Resultados del Estudiante</h2>
+                <p><strong>Estudiante:</strong> <span id="resultNombre"></span></p>
+                <p><strong>Especialidad:</strong> <span id="resultEspecialidad"></span></p>
+                <div class="promedio-display" id="resultPromedio">0.00</div>
+                <div class="estado" id="resultEstado"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Página creada por: <strong>DARCY CHIRA DIOSES</strong>
+        </div>
+    </div>
+
+    <script>
+        const especialidades = {
+            'desarrollo-sistemas': { nombre: 'Desarrollo de Sistemas', color: 'desarrollo-sistemas' },
+            'contabilidad': { nombre: 'Contabilidad', color: 'contabilidad' },
+            'enfermeria': { nombre: 'Enfermería Técnica', color: 'enfermeria' },
+            'petroleo': { nombre: 'Petróleo, Gas y Refinación', color: 'petroleo' },
+            'pesquero': { nombre: 'Desarrollo Pesquero y Acuícola', color: 'pesquero' },
+            'mecatronica': { nombre: 'Mecatrónica Automotriz', color: 'mecatronica' }
+        };
+
+        const especialidadSelect = document.getElementById('especialidad');
+        const specialtyBar = document.getElementById('specialtyBar');
+        const form = document.getElementById('promedioForm');
+        const resultado = document.getElementById('resultado');
+
+        // Cambiar color de barra según especialidad
+        especialidadSelect.addEventListener('change', function() {
+            const selected = this.value;
+            specialtyBar.className = 'specialty-bar';
+            if (selected && especialidades[selected]) {
+                specialtyBar.classList.add(especialidades[selected].color);
+            }
+        });
+
+        // Ocultar mensajes de error al escribir
+        document.querySelectorAll('input, select').forEach(input => {
+            input.addEventListener('input', function() {
+                const errorId = 'error' + this.id.charAt(0).toUpperCase() + this.id.slice(1);
+                const errorElement = document.getElementById(errorId);
+                if (errorElement) {
+                    errorElement.style.display = 'none';
+                }
+            });
+        });
+
+        // Validar y calcular promedio
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            let isValid = true;
+            
+            // Validar nombre
+            const nombre = document.getElementById('nombreCompleto').value.trim();
+            if (nombre === '') {
+                document.getElementById('errorNombre').style.display = 'block';
+                isValid = false;
+            }
+
+            // Validar especialidad
+            const especialidad = document.getElementById('especialidad').value;
+            if (especialidad === '') {
+                document.getElementById('errorEspecialidad').style.display = 'block';
+                isValid = false;
+            }
+
+            // Validar notas
+            const notas = [];
+            for (let i = 1; i <= 4; i++) {
+                const notaInput = document.getElementById('nota' + i);
+                const notaValue = parseFloat(notaInput.value);
+                
+                if (notaInput.value === '' || isNaN(notaValue) || notaValue < 0 || notaValue > 20) {
+                    document.getElementById('errorNota' + i).style.display = 'block';
+                    isValid = false;
+                } else {
+                    notas.push(notaValue);
+                }
+            }
+
+            if (!isValid) {
+                return;
+            }
+
+            // Calcular promedio
+            const promedio = (notas.reduce((a, b) => a + b, 0) / 4).toFixed(2);
+            const aprobado = promedio >= 13;
+
+            // Mostrar resultados
+            document.getElementById('resultNombre').textContent = nombre;
+            document.getElementById('resultEspecialidad').textContent = especialidades[especialidad].nombre;
+            document.getElementById('resultPromedio').textContent = promedio;
+            
+            const estadoElement = document.getElementById('resultEstado');
+            if (aprobado) {
+                estadoElement.textContent = '✅ APROBADO';
+                resultado.className = 'resultado aprobado';
+            } else {
+                estadoElement.textContent = '❌ DESAPROBADO';
+                resultado.className = 'resultado desaprobado';
+            }
+
+            resultado.style.display = 'block';
+            resultado.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+    </script>
+</body>
+</html>
